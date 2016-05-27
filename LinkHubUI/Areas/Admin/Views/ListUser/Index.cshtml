@@ -1,0 +1,61 @@
+﻿@model IEnumerable<BOL.tbl_User>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+
+        <th>@Html.ActionLink("UserEmail", "Index", new { sortOrder = ViewBag.SortOrder, SortBy = "UserEmail", Page = ViewBag.Page })</th>
+        <th>@Html.ActionLink("Role", "Index", new { sortOrder = ViewBag.SortOrder, SortBy = "Role", Page = ViewBag.Page })</th>
+
+    </tr>
+
+    @foreach (var item in Model) {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.UserEmail)</td>
+            <td>@Html.DisplayFor(modelItem => item.Role)</td>
+        </tr>
+    }
+    @{if (Model.Count() == 0) { }
+        <tr><td colspan="4" align="center">No Data</td></tr>
+    }
+</table>
+
+
+
+@{
+    double TotalPages = @ViewBag.TotalPages;
+}
+@for (int i = 1; i <= TotalPages; i++)
+{
+    if (i == ViewBag.Page)
+    {
+        <b>
+            @Html.ActionLink(i.ToString() + " ", "Index",
+                        new
+                        {
+                            SortOrder = ViewBag.SortOrderStatic,
+                            SortBy = ViewBag.SortBy,
+                            Page = i
+                        })
+        </b>
+    }
+    else
+    {
+        @Html.ActionLink(i.ToString() + " ", "Index",
+                        new
+                        {
+                            SortOrder = ViewBag.SortOrderStatic,
+                            SortBy = ViewBag.SortBy,
+                            Page = i
+                        })
+    }
+}

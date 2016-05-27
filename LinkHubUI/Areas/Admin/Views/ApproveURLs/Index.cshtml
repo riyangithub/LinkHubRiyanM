@@ -1,0 +1,167 @@
+﻿@model IEnumerable<BOL.tbl_Url>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script>
+    //$(function () {
+
+    //    // add multiple select / deselect functionality
+    //    $("#selectall").click(function () {
+    //        $('.ckb').attr('checked', this.checked);
+    //    });
+
+    //    // if all checkbox are selected, check the selectall checkbox
+    //    // and viceversa
+    //    $(".ckb").click(function () {
+
+    //        if ($(".ckb").length == $(".ckb:checked").length) {
+    //            $("#selectall").attr("checked", "checked");
+    //        } else {
+    //            $("#selectall").removeAttr("checked");
+    //        }
+    //    });
+    //});
+
+    $(document).ready(function () {
+
+        $(document).ajaxStart(function () {
+            $("#loading").show();
+        });
+
+        $(document).ajaxStop(function () {
+            $("#loading").hide();
+        });
+
+        BindSelectAll();
+
+        //Aprove
+        $("#Approve").click(function () {
+            checkedIds = $(".ckb").filter(":checked").map(function () {return this.id;});
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("ApproveOrRejectAll","ApproveURLs")",
+                traditional:true,
+                data: { Ids: checkedIds.toArray(), Status: "A",CurrentStatus:"@ViewBag.Status" },
+            success: successFunc,
+            error:errorFunc
+        });         
+
+            function successFunc(data, status) {
+                $("#Data").html(data);
+            //alert(data);
+                //location.reload();
+                BindSelectAll();
+            }
+
+        function errorFunc() {            
+            alert('error bro');
+        }
+        });
+        //End Aprove
+
+
+        //Reject
+        $("#Reject").click(function () {
+            checkedIds = $(".ckb").filter(":checked").map(function () {return this.id;});
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("ApproveOrRejectAll","ApproveURLs")",
+                traditional:true,
+                data: { Ids: checkedIds.toArray(), Status: "R", CurrentStatus: "@ViewBag.Status" },
+            success: successFunc,
+            error:errorFunc
+        }); 
+
+        function successFunc(data, status) {
+            $("#Data").html(data);
+            BindSelectAll();
+            //alert(data);
+            //location.reload();
+        }
+
+        function errorFunc() {            
+            alert('error bro');
+        }
+        });
+        //End Reject
+    });
+
+    function BindSelectAll() {
+        $("#selectall").click(function (event) {//onclick
+            if (this.checked) {//check select status
+                $('.ckb').each(function () {//loop trough each checkbox
+                    this.checked = true; //select all checkboxes with class "checkbox1"
+                });
+            } else {
+                $('.ckb').each(function () {
+                    this.checked = false; //deselect all checkboxes with class "checkbox1"
+                });
+            }
+        });
+
+        $(".ckb").click(function () {
+            //alert('OKE');
+            if ($(".ckb").length == $(".ckb:checked").length) {
+                $("#selectall").attr("checked", "checked");//not working
+
+            } else {
+                $("#selectall").removeAttr("checked");
+            }
+        });
+
+    }
+
+    function ConfirmApprove() {
+        return confirm('Are you sure to Approve');
+    }
+    function ConfirmReject() {
+        return confirm('Are you sure to Reject');
+    }
+</script>
+
+<h2>Manage URLs</h2>
+
+ 
+@*LoadingProgress{*@
+    <div id="loading" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Loading...</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="progress progress-striped active">
+                        <div class="progress-bar" style="width:100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@*}End LoadingProgress*@
+
+<ul class="nav nav-pills">
+@{
+    var dct = new Dictionary<string, string>();
+    dct.Add("P", "Pending");
+    dct.Add("A", "Approve");
+    dct.Add("R", "Reject");
+    foreach (KeyValuePair<string, string> pair in dct)
+    {
+        if (ViewBag.Status == pair.Key)
+        {<li class="active"> @Html.ActionLink(pair.Value, "Index", new { Status = pair.Key })</li>}
+        else
+        {<li> @Html.ActionLink(pair.Value, "Index", new { Status = pair.Key })</li>}
+    }
+}
+</ul>
+<br /><br />
+
+<div id="Data">
+    @Html.Partial("pv_ApproveURLs",Model)
+</div>
+
+<input type="button" id="Approve" value="Approve" class="btn btn-primary" />
+<input type="button" id="Reject" value="Reject" class="btn btn-primary" />
